@@ -15,7 +15,7 @@ function M.parse(arg)
    cmd:text()
    cmd:text('Options:')
     ------------ General options --------------------
-
+   cmd:option('-cache', './log/', 'directory to save training result')
    cmd:option('-data',     '',        'Path to dataset')
    cmd:option('-dataset', 'imagenet', 'Options: imagenet | cifar10')
    cmd:option('-manualSeed',         2, 'Manually set RNG seed')
@@ -73,6 +73,12 @@ function M.parse(arg)
       end
    end
 
+   opt.save = paths.concat(opt.cache, 
+                           cmd:string(opt.dataset .. '/' .. opt.netType, opt,
+                           {dataset=true, netType=true, retrain=true, optimState=true, 
+                            cache=true, data=true, epochNumber=true, nEpochs=true}))
+   -- opt.save = paths.concat(opt.save, '' .. os.date():gsub(' ',''))
+  
    return opt
 end
 
