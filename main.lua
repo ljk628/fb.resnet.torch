@@ -51,7 +51,7 @@ for epoch = opt.epochNumber, opt.nEpochs do
    -- Save the model if it has the best top-1 error
    if top1Err < best1Err then
       print(' * Saving best model ', top1Err, top5Err)
-      torch.save(opt.save '/model_best.t7', model)
+      torch.save(opt.save .. '/model_best.t7', model)
       best1Err = top1Err
       best5Err = top5Err
    end
