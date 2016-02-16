@@ -10,6 +10,8 @@ require 'torch'
 require 'paths'
 require 'optim'
 require 'nn'
+require 'xlua'
+
 local DataLoader = require 'dataloader'
 local datasets = require 'datasets/init'
 local models = require 'models/init'
@@ -49,13 +51,15 @@ for epoch = opt.epochNumber, opt.nEpochs do
    local top1Err, top5Err = trainer:test(epoch, valLoader)
 
    -- Save the model if it has the best top-1 error
-   if top1Err < best1Err then
-      print(' * Saving best model ', top1Err, top5Err)
-      torch.save(opt.save .. '/model_best.t7', model)
-      best1Err = top1Err
-      best5Err = top5Err
+   if opt.saveModel then
+     if top1Err < best1Err then
+        print(' * Saving best model ', top1Err, top5Err)
+        torch.save(opt.save .. '/model_best.t7', model)
+        best1Err = top1Err
+        best5Err = top5Err
+     end
+     torch.save(opt.save .. '/model_' .. epoch .. '.t7', model)
    end
-   torch.save(opt.save .. '/model_' .. epoch .. '.t7', model)
 end
 
 print(string.format(' * Finished top1: %6.3f  top5: %6.3f', best1Err, best5Err))

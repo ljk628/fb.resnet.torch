@@ -30,6 +30,8 @@ function M.parse(arg)
    cmd:option('-batchSize',       32,    'mini-batch size (1 = pure stochastic)')
    cmd:option('-testOnly',        false, 'Run on validation set only')
    cmd:option('-tenCrop',         false, 'Ten-crop testing')
+   cmd:option('-verbose',         false, 'display results after each minibatch')
+   cmd:option('-saveModel',       true,  'save model to file after each epoch' )
    ---------- Optimization options ----------------------
    cmd:option('-LR',              0.1,   'initial learning rate')
    cmd:option('-momentum',        0.9,   'momentum')
@@ -73,10 +75,13 @@ function M.parse(arg)
       end
    end
 
+   local modelName = opt.netType .. '-' .. opt.depth .. '-' .. opt.shortcutType
    opt.save = paths.concat(opt.cache, 
-                           cmd:string(opt.dataset .. '/' .. opt.netType, opt,
-                           {dataset=true, netType=true, retrain=true, optimState=true, 
-                            cache=true, data=true, epochNumber=true, nEpochs=true}))
+                           cmd:string(opt.dataset .. '/' .. modelName , opt,
+                           {cache=true, data=true, dataset=true, netType=true, 
+                            depth=true, shortcutType=true, retrain=true, 
+                            verbose=true, saveModel=true,
+                            optimState=true, epochNumber=true, nEpochs=true, batchSize=false}))
    -- opt.save = paths.concat(opt.save, '' .. os.date():gsub(' ',''))
   
    return opt
