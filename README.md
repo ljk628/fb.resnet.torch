@@ -12,6 +12,8 @@ See the [installation instructions](INSTALL.md) for a step-by-step guide.
 - Install [cuDNN v4](https://developer.nvidia.com/cudnn) and the Torch [cuDNN bindings](https://github.com/soumith/cudnn.torch/tree/R4)
 - Download the [ImageNet](http://image-net.org/download-images) dataset and [move validation images](https://github.com/facebook/fb.resnet.torch/blob/master/INSTALL.md#download-the-imagenet-dataset) to labeled subfolders
 
+If you already have Torch installed, update `nn`, `cunn`, and `cudnn`.
+
 ## Training
 See the [training recipes](TRAINING.md) for addition examples.
 
@@ -27,12 +29,12 @@ th main.lua -data [imagenet-folder with train and val folders]
 
 To train ResNet-50 on 4 GPUs:
 ```bash
-th main.lua -depth 50 -batchSize 256 -nGPU 4 -nThreads 8 -shareGradInput -data [imagenet-folder]
+th main.lua -depth 50 -batchSize 256 -nGPU 4 -nThreads 8 -shareGradInput true -data [imagenet-folder]
 ```
 
 ## Trained models
 
-Trained ResNet 18, 34, 50, and 101 models are [available for download](pretrained). We include instructions for [using a custom dataset](pretrained/README.md#fine-tuning-on-a-custom-dataset) and for [extracting image features](pretrained/README.md#extracting-image-features) using a pre-trained model.
+Trained ResNet 18, 34, 50, and 101 models are [available for download](pretrained). We include instructions for [using a custom dataset](pretrained/README.md#fine-tuning-on-a-custom-dataset), [classifying an image and getting the model's top5 predictions](pretrained/README.md#classification), and for [extracting image features](pretrained/README.md#extracting-image-features) using a pre-trained model.
 
 The trained models achieve better error rates than the [original ResNet models](https://github.com/KaimingHe/deep-residual-networks).
 

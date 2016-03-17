@@ -18,7 +18,7 @@ th main.lua -dataset cifar10 -nGPU 2 -batchSize 128 -depth 110
 To fit ResNet-1202 on two GPUs, you will need to use the [`-shareGradInput`](#sharegradinput) flag:
 
 ```bash
-th main.lua -dataset cifar10 -nGPU 2 -batchSize 128 -depth 1202 -shareGradInput
+th main.lua -dataset cifar10 -nGPU 2 -batchSize 128 -depth 1202 -shareGradInput true
 ```
 
 ### ImageNet
@@ -39,13 +39,13 @@ th main.lua -depth 34 -nGPU 4 -nThreads 8 -batchSize 256 -data [imagenet-folder]
 To train ResNet-50 on 4 GPUs, you will need to use the [`-shareGradInput`](#sharegradinput) flag:
 
 ```bash
-th main.lua -depth 50 -nGPU 4 -nThreads 8 -batchSize 256 -shareGradInput -data [imagenet-folder]
+th main.lua -depth 50 -nGPU 4 -nThreads 8 -batchSize 256 -shareGradInput true -data [imagenet-folder]
 ```
 
 To train ResNet-101 or ResNet-152 with batch size 256, you may need 8 GPUs:
 
 ```bash
-th main.lua -depth 152 -nGPU 8 -nThreads 12 -batchSize 256 -shareGradInput -data [imagenet-folder]
+th main.lua -depth 152 -nGPU 8 -nThreads 12 -batchSize 256 -shareGradInput true -data [imagenet-folder]
 ```
 
 ## Useful flags
@@ -55,8 +55,10 @@ For a complete list of flags, run `th main.lua --help`.
 ### shareGradInput
 
 The `-shareGradInput` flag enables sharing of `gradInput` tensors between modules of the same type. This reduces
-memory usage. It works correctly with the include ResNet models, but may not work for other network architectures. See 
-[models/init.lua](models/init.lua#L37-L55) for the implementation.
+memory usage. It works correctly with the included ResNet models, but may not work for other network architectures. See 
+[models/init.lua](models/init.lua#L42-L60) for the implementation.
+
+The `shareGradInput` implementation may not work with older versions of the `nn` package. Update your `nn` package by running `luarocks install nn`.
 
 ### shortcutType
 

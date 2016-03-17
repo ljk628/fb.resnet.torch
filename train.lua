@@ -14,10 +14,10 @@ local optim = require 'optim'
 local M = {}
 local Trainer = torch.class('resnet.Trainer', M)
 
-function Trainer:__init(model, criterion, opt)
+function Trainer:__init(model, criterion, opt, optimState)
    self.model = model
    self.criterion = criterion
-   self.optimState = {
+   self.optimState = optimState or {
       learningRate = opt.LR,
       learningRateDecay = 0.0,
       momentum = opt.momentum,
@@ -41,12 +41,14 @@ function Trainer:train(epoch, dataloader)
    end
 
    local trainSize = dataloader:size()
+   local top1Sum, top5Sum, lossSum = 0.0, 0.0, 0.0
+   local N = 0
 
    print('=> Training epoch # ' .. epoch)
    -- set the batch norm to training mode
    self.model:training()
    for n, sample in dataloader:run() do
-      xlua.progress(n, trainSize)
+      if self.opt.showBar then  xlua.progress(n, trainSize) end
       local dataTime = dataTimer:time().real
 
       -- Copy input and target to the GPU
@@ -62,6 +64,10 @@ function Trainer:train(epoch, dataloader)
       optim.sgd(feval, self.params, self.optimState)
 
       local top1, top5 = self:computeScore(output, sample.target, 1)
+      top1Sum = top1Sum + top1
+      top5Sum = top5Sum + top5
+      lossSum = lossSum + loss
+      N = N + 1
 
       if self.opt.verbose then
          print((' | Epoch: [%d][%d/%d]    Time %.3f  Data %.3f  Err %1.4f  top1 %7.3f  top5 %7.3f'):format(
@@ -74,6 +80,8 @@ function Trainer:train(epoch, dataloader)
       timer:reset()
       dataTimer:reset()
    end
+
+   return top1Sum / N, top5Sum / N, lossSum / N
 end
 
 function Trainer:test(epoch, dataloader)
@@ -89,7 +97,7 @@ function Trainer:test(epoch, dataloader)
 
    self.model:evaluate()
    for n, sample in dataloader:run() do
-      xlua.progress(n, size)
+      if self.opt.showBar then xlua.progress(n, size) end
       local dataTime = dataTimer:time().real
 
       -- Copy input and target to the GPU
@@ -113,12 +121,10 @@ function Trainer:test(epoch, dataloader)
    end
    self.model:training()
 
-   local top1Avg = top1Sum / N
-   local top5Avg = top5Sum / N
    print((' * Finished epoch # %d     top1: %7.3f  top5: %7.3f\n'):format(
-      epoch, top1Avg, top5Avg))
+      epoch, top1Sum / N, top5Sum / N))
 
-   return top1Avg, top5Avg
+   return top1Sum / N, top5Sum / N
 end
 
 function Trainer:computeScore(output, target, nCrops)
@@ -138,8 +144,12 @@ function Trainer:computeScore(output, target, nCrops)
    local correct = predictions:eq(
       target:long():view(batchSize, 1):expandAs(output))
 
-   local top1 = 1.0 - correct:narrow(2, 1, 1):sum() / batchSize
-   local top5 = 1.0 - correct:narrow(2, 1, 5):sum() / batchSize
+   -- Top-1 score
+   local top1 = 1.0 - (correct:narrow(2, 1, 1):sum() / batchSize)
+
+   -- Top-5 score, if there are at least 5 classes
+   local len = math.min(5, correct:size(2))
+   local top5 = 1.0 - (correct:narrow(2, 1, len):sum() / batchSize)
 
    return top1 * 100, top5 * 100
 end
